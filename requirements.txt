@@ -1,3 +1,4 @@
 flask==3.1.0
+markupsafe==3.0.2
 yfinance==0.2.54
 gunicorn==23.0.0
