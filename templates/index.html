@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>股市學習大師</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0f0f23;--card:#1a1a3e;--accent:#00d4aa;--accent2:#7c5cff;--text:#e0e0ff;--dim:#8888aa;--danger:#ff6b6b;--success:#00d4aa;--warning:#ffd93d}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.7}
+.container{max-width:800px;margin:0 auto;padding:20px}
+.header{text-align:center;padding:40px 20px;background:linear-gradient(135deg,#1a1a3e,#2d1b69);border-radius:20px;margin-bottom:30px}
+.header h1{font-size:2.5em;margin-bottom:10px}
+.header p{color:var(--dim);font-size:1.1em}
+.progress-bar{background:#2a2a4e;border-radius:20px;height:12px;margin:20px auto;max-width:400px;overflow:hidden}
+.progress-fill{background:linear-gradient(90deg,var(--accent),var(--accent2));height:100%;border-radius:20px;transition:width .5s ease}
+.progress-text{color:var(--accent);font-size:.9em;margin-top:8px}
+.nav{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:30px}
+.nav-btn{padding:8px 16px;border:1px solid #333;border-radius:20px;background:transparent;color:var(--dim);cursor:pointer;font-size:.85em;transition:all .3s}
+.nav-btn:hover,.nav-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+.course-list{display:grid;gap:12px}
+.course-item{display:flex;align-items:center;gap:15px;padding:18px;background:var(--card);border-radius:14px;cursor:pointer;transition:all .3s;border:1px solid transparent}
+.course-item:hover{border-color:var(--accent);transform:translateX(5px)}
+.course-item.completed{border-left:4px solid var(--success)}
+.course-icon{font-size:2em;min-width:50px;text-align:center}
+.course-info h3{font-size:1em;margin-bottom:4px}
+.course-info p{font-size:.8em;color:var(--dim)}
+.course-badge{margin-left:auto;font-size:.75em;padding:4px 10px;border-radius:10px;white-space:nowrap}
+.badge-done{background:#1a3d2a;color:var(--success)}
+.badge-new{background:#2d1b40;color:var(--accent2)}
+.lesson{display:none}
+.lesson.active{display:block}
+.lesson-header{display:flex;align-items:center;gap:15px;margin-bottom:25px;flex-wrap:wrap}
+.lesson-header h2{font-size:1.5em}
+.back-btn{padding:8px 16px;background:var(--card);border:1px solid #444;border-radius:10px;color:var(--text);cursor:pointer;font-size:.9em}
+.back-btn:hover{border-color:var(--accent)}
+.lesson-content{background:var(--card);padding:25px;border-radius:16px;margin-bottom:25px;white-space:pre-line;font-size:.95em;line-height:1.9}
+.quiz-section{background:var(--card);padding:25px;border-radius:16px;margin-bottom:15px}
+.quiz-section h3{color:var(--warning);margin-bottom:15px;font-size:1.1em}
+.quiz-q{font-size:1.05em;margin-bottom:15px;font-weight:600}
+.quiz-options{display:grid;gap:10px}
+.quiz-opt{padding:14px 18px;background:#1f1f45;border:2px solid #333;border-radius:12px;cursor:pointer;transition:all .3s;text-align:left;color:var(--text);font-size:.95em}
+.quiz-opt:hover{border-color:var(--accent2);background:#252550}
+.quiz-opt.correct{border-color:var(--success);background:#1a3d2a}
+.quiz-opt.wrong{border-color:var(--danger);background:#3d1a1a}
+.quiz-opt.disabled{pointer-events:none;opacity:.7}
+.explanation{margin-top:15px;padding:15px;background:#1f1f45;border-radius:10px;border-left:4px solid var(--accent);display:none}
+.explanation.show{display:block}
+.next-btn{display:none;width:100%;padding:16px;background:linear-gradient(135deg,var(--accent),var(--accent2));border:none;border-radius:14px;color:#000;font-size:1.1em;font-weight:700;cursor:pointer;margin-top:20px;transition:transform .2s}
+.next-btn:hover{transform:scale(1.02)}
+.next-btn.show{display:block}
+.stock-lookup{background:var(--card);padding:25px;border-radius:16px;margin-bottom:25px}
+.stock-lookup h3{margin-bottom:15px}
+.stock-input-group{display:flex;gap:10px}
+.stock-input{flex:1;padding:12px;background:#1f1f45;border:1px solid #444;border-radius:10px;color:var(--text);font-size:1em}
+.stock-input::placeholder{color:var(--dim)}
+.stock-btn{padding:12px 24px;background:var(--accent);border:none;border-radius:10px;color:#000;font-weight:700;cursor:pointer}
+.stock-btn:hover{opacity:.9}
+.stock-result{margin-top:15px}
+.stock-card{background:#1f1f45;padding:20px;border-radius:12px}
+.stock-price{font-size:2em;font-weight:700}
+.stock-change.up{color:var(--success)}
+.stock-change.down{color:var(--danger)}
+.stock-metrics{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:15px}
+.metric{padding:10px;background:#16163a;border-radius:8px}
+.metric-label{font-size:.75em;color:var(--dim)}
+.metric-value{font-size:1.1em;font-weight:600}
+.glossary{background:var(--card);padding:25px;border-radius:16px;margin-top:25px}
+.glossary h3{margin-bottom:15px}
+.glossary-grid{display:grid;gap:8px}
+.glossary-item{padding:12px;background:#1f1f45;border-radius:8px;cursor:pointer}
+.glossary-item strong{color:var(--accent)}
+.glossary-item .def{display:none;margin-top:8px;font-size:.9em;color:var(--dim)}
+.glossary-item.open .def{display:block}
+@media(max-width:600px){.header h1{font-size:1.8em}.container{padding:12px}.stock-input-group{flex-direction:column}.stock-metrics{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="home">
+    <div class="header">
+      <h1>股市學習大師</h1>
+      <p>從零開始，10 堂課變成股票高手</p>
+      <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-text" id="progressText">完成 0 / 10 堂課</div>
+    </div>
+    <div class="nav" id="categoryNav"></div>
+    <div class="course-list" id="courseList"></div>
+    <div class="stock-lookup">
+      <h3>即時股票查詢（練習看指標）</h3>
+      <div class="stock-input-group">
+        <input class="stock-input" id="stockInput" placeholder="輸入股票代號，例如：2330.TW 或 AAPL">
+        <button class="stock-btn" id="stockBtn">查詢</button>
+      </div>
+      <div class="stock-result" id="stockResult"></div>
+      <p style="font-size:.75em;color:var(--dim);margin-top:8px">常用：2330.TW 台積電 / 0050.TW 元大50 / AAPL 蘋果 / NVDA 輝達</p>
+    </div>
+    <div class="glossary">
+      <h3>投資術語速查表（點擊展開）</h3>
+      <div class="glossary-grid" id="glossaryGrid"></div>
+    </div>
+  </div>
+  <div class="lesson" id="lessonView">
+    <div class="lesson-header">
+      <button class="back-btn" id="backBtn">← 返回</button>
+      <h2 id="lessonTitle"></h2>
+    </div>
+    <div class="lesson-content" id="lessonContent"></div>
+    <div id="quizContainer"></div>
+    <button class="next-btn" id="nextBtn">下一課 →</button>
+  </div>
+</div>
+<script>
+const courses = {{ courses | safe }};
+const glossaryData = {{ glossary | safe }};
+let completedLessons = JSON.parse(localStorage.getItem('completedLessons') || '[]');
+let currentLesson = null;
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.textContent;
+}
+
+function init() {
+  renderCategories();
+  renderCourses();
+  renderGlossary();
+  updateProgress();
+  document.getElementById('backBtn').addEventListener('click', goHome);
+  document.getElementById('nextBtn').addEventListener('click', nextLesson);
+  document.getElementById('stockBtn').addEventListener('click', lookupStock);
+  document.getElementById('stockInput').addEventListener('keypress', function(e) { if(e.key==='Enter') lookupStock(); });
+}
+
+function renderCategories() {
+  const cats = [...new Set(courses.map(function(c){return c.category}))];
+  const nav = document.getElementById('categoryNav');
+  const allBtn = document.createElement('button');
+  allBtn.className = 'nav-btn active';
+  allBtn.textContent = '全部';
+  allBtn.addEventListener('click', function() { filterCourses('all', this); });
+  nav.appendChild(allBtn);
+  cats.forEach(function(c) {
+    const btn = document.createElement('button');
+    btn.className = 'nav-btn';
+    btn.textContent = c;
+    btn.addEventListener('click', function() { filterCourses(c, this); });
+    nav.appendChild(btn);
+  });
+}
+
+function filterCourses(cat, btn) {
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');
+  document.querySelectorAll('.course-item').forEach(function(item) {
+    item.style.display = (cat==='all' || item.dataset.cat===cat) ? 'flex' : 'none';
+  });
+}
+
+function renderCourses() {
+  const list = document.getElementById('courseList');
+  while(list.firstChild) list.removeChild(list.firstChild);
+  courses.forEach(function(c) {
+    const done = completedLessons.indexOf(c.id) !== -1;
+    const div = document.createElement('div');
+    div.className = 'course-item' + (done ? ' completed' : '');
+    div.dataset.cat = c.category;
+    div.addEventListener('click', function() { openLesson(c.id); });
+
+    const iconDiv = document.createElement('div');
+    iconDiv.className = 'course-icon';
+    iconDiv.textContent = c.icon;
+
+    const infoDiv = document.createElement('div');
+    infoDiv.className = 'course-info';
+    const h3 = document.createElement('h3');
+    h3.textContent = '第 ' + c.id + ' 課：' + c.title;
+    const p = document.createElement('p');
+    p.textContent = c.category;
+    infoDiv.appendChild(h3);
+    infoDiv.appendChild(p);
+
+    const badge = document.createElement('span');
+    badge.className = 'course-badge ' + (done ? 'badge-done' : 'badge-new');
+    badge.textContent = done ? '完成' : '未完成';
+
+    div.appendChild(iconDiv);
+    div.appendChild(infoDiv);
+    div.appendChild(badge);
+    list.appendChild(div);
+  });
+}
+
+function openLesson(id) {
+  currentLesson = courses.find(function(c){return c.id===id});
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('lessonView').classList.add('active');
+  document.getElementById('lessonTitle').textContent = currentLesson.icon + ' 第 ' + id + ' 課：' + currentLesson.title;
+  document.getElementById('lessonContent').textContent = currentLesson.content.trim();
+  renderQuiz(currentLesson.quiz);
+  document.getElementById('nextBtn').classList.remove('show');
+  window.scrollTo(0,0);
+}
+
+function renderQuiz(quizzes) {
+  const container = document.getElementById('quizContainer');
+  while(container.firstChild) container.removeChild(container.firstChild);
+  quizzes.forEach(function(q, qi) {
+    const section = document.createElement('div');
+    section.className = 'quiz-section';
+    section.id = 'quiz' + qi;
+
+    const h3 = document.createElement('h3');
+    h3.textContent = '測驗 ' + (qi+1) + '/' + quizzes.length;
+    section.appendChild(h3);
+
+    const qDiv = document.createElement('div');
+    qDiv.className = 'quiz-q';
+    qDiv.textContent = q.question;
+    section.appendChild(qDiv);
+
+    const optsDiv = document.createElement('div');
+    optsDiv.className = 'quiz-options';
+    q.options.forEach(function(opt, oi) {
+      const btn = document.createElement('button');
+      btn.className = 'quiz-opt';
+      btn.textContent = opt;
+      btn.addEventListener('click', function() { checkAnswer(qi, oi, q.answer); });
+      optsDiv.appendChild(btn);
+    });
+    section.appendChild(optsDiv);
+
+    const expDiv = document.createElement('div');
+    expDiv.className = 'explanation';
+    expDiv.id = 'exp' + qi;
+    expDiv.textContent = q.explanation;
+    section.appendChild(expDiv);
+
+    container.appendChild(section);
+  });
+}
+
+function checkAnswer(qi, selected, correct) {
+  var quiz = document.getElementById('quiz'+qi);
+  var opts = quiz.querySelectorAll('.quiz-opt');
+  opts.forEach(function(o, i) {
+    o.classList.add('disabled');
+    if(i===correct) o.classList.add('correct');
+    if(i===selected && i!==correct) o.classList.add('wrong');
+  });
+  document.getElementById('exp'+qi).classList.add('show');
+  var allAnswered = currentLesson.quiz.every(function(_, i) {
+    var q = document.getElementById('quiz'+i);
+    return q.querySelector('.quiz-opt.correct') || q.querySelector('.quiz-opt.wrong');
+  });
+  if(allAnswered) {
+    if(completedLessons.indexOf(currentLesson.id) === -1) {
+      completedLessons.push(currentLesson.id);
+      localStorage.setItem('completedLessons', JSON.stringify(completedLessons));
+    }
+    document.getElementById('nextBtn').classList.add('show');
+    updateProgress();
+  }
+}
+
+function nextLesson() {
+  var nextId = currentLesson.id + 1;
+  if(nextId <= courses.length) { openLesson(nextId); }
+  else { goHome(); alert('恭喜你完成全部課程！你已經具備股市投資的基礎知識了！'); }
+}
+
+function goHome() {
+  document.getElementById('home').style.display = 'block';
+  document.getElementById('lessonView').classList.remove('active');
+  renderCourses();
+  window.scrollTo(0,0);
+}
+
+function updateProgress() {
+  var pct = Math.round(completedLessons.length / courses.length * 100);
+  document.getElementById('progressFill').style.width = pct + '%';
+  document.getElementById('progressText').textContent = '完成 ' + completedLessons.length + ' / ' + courses.length + ' 堂課（' + pct + '%）';
+}
+
+function renderGlossary() {
+  var grid = document.getElementById('glossaryGrid');
+  glossaryData.forEach(function(g) {
+    var div = document.createElement('div');
+    div.className = 'glossary-item';
+    var strong = document.createElement('strong');
+    strong.textContent = g.term;
+    var defDiv = document.createElement('div');
+    defDiv.className = 'def';
+    defDiv.textContent = g.def;
+    div.appendChild(strong);
+    div.appendChild(defDiv);
+    div.addEventListener('click', function() { div.classList.toggle('open'); });
+    grid.appendChild(div);
+  });
+}
+
+function lookupStock() {
+  var symbol = document.getElementById('stockInput').value.trim();
+  if(!symbol) return;
+  var result = document.getElementById('stockResult');
+  result.textContent = '查詢中...';
+  fetch('/api/stock/' + encodeURIComponent(symbol))
+    .then(function(res) { return res.json(); })
+    .then(function(data) {
+      while(result.firstChild) result.removeChild(result.firstChild);
+      if(data.error) { result.textContent = data.error; return; }
+      var card = document.createElement('div');
+      card.className = 'stock-card';
+
+      var topRow = document.createElement('div');
+      topRow.style.cssText = 'display:flex;justify-content:space-between;align-items:center';
+      var leftDiv = document.createElement('div');
+      var nameEl = document.createElement('div');
+      nameEl.style.cssText = 'font-size:.85em;color:var(--dim)';
+      nameEl.textContent = data.name + ' (' + data.symbol + ')';
+      var priceEl = document.createElement('div');
+      priceEl.className = 'stock-price';
+      priceEl.textContent = data.price;
+      leftDiv.appendChild(nameEl);
+      leftDiv.appendChild(priceEl);
+      var changeEl = document.createElement('div');
+      changeEl.className = 'stock-change ' + (data.change >= 0 ? 'up' : 'down');
+      changeEl.style.cssText = 'font-size:1.3em;font-weight:700';
+      changeEl.textContent = (data.change >= 0 ? '▲' : '▼') + ' ' + data.change_pct + '%';
+      topRow.appendChild(leftDiv);
+      topRow.appendChild(changeEl);
+      card.appendChild(topRow);
+
+      var metrics = document.createElement('div');
+      metrics.className = 'stock-metrics';
+      var metricData = [
+        ['本益比 P/E', data.pe], ['EPS', data.eps],
+        ['殖利率', data.dividend_yield], ['市值', data.market_cap],
+        ['52週高', data.high_52w], ['52週低', data.low_52w]
+      ];
+      metricData.forEach(function(m) {
+        var mDiv = document.createElement('div');
+        mDiv.className = 'metric';
+        var label = document.createElement('div');
+        label.className = 'metric-label';
+        label.textContent = m[0];
+        var value = document.createElement('div');
+        value.className = 'metric-value';
+        value.textContent = m[1];
+        mDiv.appendChild(label);
+        mDiv.appendChild(value);
+        metrics.appendChild(mDiv);
+      });
+      card.appendChild(metrics);
+
+      var tip = document.createElement('p');
+      tip.style.cssText = 'margin-top:12px;font-size:.8em;color:var(--dim)';
+      tip.textContent = '試著用學到的指標分析這支股票：P/E 跟同業比是高還是低？殖利率夠不夠？';
+      card.appendChild(tip);
+      result.appendChild(card);
+    })
+    .catch(function() { result.textContent = '查詢失敗，請確認代號是否正確'; });
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
